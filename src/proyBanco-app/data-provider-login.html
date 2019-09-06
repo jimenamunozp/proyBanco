@@ -1,0 +1,111 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<dom-module id="data-provider-login">
+    <template>
+        <style>
+            :host {
+                display: block
+            }
+        </style>
+        <paper-card width="500px" height="500px" >
+            <h2>Login</h2>
+        <paper-input label="usuario" value="{{usuario}}"></paper-input>
+        <paper-input label="clave" value="{{clave}}"></paper-input>
+        </paper-card>
+        
+        <button on-click="login"> Login</button>
+        <iron-ajax id="ajaxLogin" 
+            url="https://artichoke.platform.bbva.com/TechArchitecture/co/grantingTicket/V02"
+            method="post"
+            handle-as="json" 
+            content-type="application/json" 
+            body="[[body]]" 
+            on-response="ajaxResponse"
+            >
+        </iron-ajax>
+       </template>
+
+    <script>
+        /**
+         * `data-provider-login` Description
+         *
+         * @summary ShortDescription.
+         * @customElement
+         * @polymer
+         * @extends {Polymer.Element}
+         */
+        class DataProviderLogin extends Polymer.Element {
+            /**
+             * String providing the tag name to register the element under.
+             */
+            static get is() {
+                return 'data-provider-login';
+            }
+
+            /**
+             * Object describing property-related metadata used by Polymer features
+             */
+            static get properties() {
+                return {
+                    usuario:String,
+                    clave:String,
+                    body: {
+                        type: Object
+                    }
+
+                };
+            }
+            ajaxResponse(e, request) {
+             var headers = request.xhr.getAllResponseHeaders();
+             console.log(headers);
+            }
+
+            login(){
+            var datos =  {
+                                "authentication": {
+                                    "userID": this.usuario,
+                                    "consumerID": "10000033",
+                                    "authenticationType": "02",
+                                    "authenticationData": [{
+                                        "idAuthenticationData": "password",
+                                        "authenticationData": [this.clave]
+                                    }]
+                                },
+                                "backendUserRequest": {
+                                    "userId": "",
+                                    "accessCode": this.usuario,
+                                    "dialogId": ""
+                                }
+                            }
+                        ;
+                this.body = datos;
+                this.$.ajaxLogin.generateRequest();               
+            }
+            /**
+             * Instance of the element is created/upgraded. Use: initializing state,
+             * set up event listeners, create shadow dom.
+             * @constructor
+             */
+            constructor() {
+                super();
+            }
+
+            /**
+             * Use for one-time configuration of your component after local DOM is initialized. 
+             */
+            ready() {
+                super.ready();
+
+                Polymer.RenderStatus.afterNextRender(this, function () {
+
+                });
+            }
+
+        }
+
+        window.customElements.define(DataProviderLogin.is, DataProviderLogin);
+    </script>
+</dom-module>

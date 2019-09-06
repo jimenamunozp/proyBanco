@@ -1,0 +1,6 @@
+{
+  "name": "proyBanco",
+  "short_name": "proyBanco",
+  "start_url": "/",
+  "display": "standalone"
+}
