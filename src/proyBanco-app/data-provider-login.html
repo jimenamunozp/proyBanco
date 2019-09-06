@@ -3,6 +3,7 @@
 <link rel="import" href="../../bower_components/polymer/lib/elements/dom-repeat.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <dom-module id="data-provider-login">
     <template>
         <style>
@@ -10,13 +11,32 @@
                 display: block
             }
         </style>
-        <paper-card width="500px" height="500px" >
-            <h2>Login</h2>
-        <paper-input label="usuario" value="{{usuario}}"></paper-input>
-        <paper-input label="clave" value="{{clave}}"></paper-input>
-        </paper-card>
+        <template is="dom-if" if="[[!logueado]]">
+            <center>
+                <paper-card width="500px" height="500px" >
+                        <div class="card-content">   <h2>Login</h2>
+                        <paper-input label="usuario" value="{{usuario}}"></paper-input>
+                        <paper-input label="clave" value="{{clave}}"></paper-input>
+                        </div>
+                        <paper-button on-click="login"> Login</paper-button>
+                      
+                        </paper-card>
+                </center>
+                        
+        </template>
+        <template is="dom-if" if="[[logueado]]">
+                <center>
+                <paper-card width="1000px" height="500px" >
+                        <div class="card-content">   <h2>Bienvenido</h2>
+                            <template is="dom-repeat" items="{{card}}" as="elementos">
+                                    [[elementos.cardId]]
+                                </template>
+            </paper-card>
+        </center>
+                        
+        </template>
         
-        <button on-click="login"> Login</button>
+       
         <iron-ajax id="ajaxLogin" 
             url="https://artichoke.platform.bbva.com/TechArchitecture/co/grantingTicket/V02"
             method="post"
@@ -26,6 +46,18 @@
             on-response="ajaxResponse"
             >
         </iron-ajax>
+        [[header]]
+        <iron-ajax id="ajaxCard" 
+            url="https://artichoke.platform.bbva.com/cards/v0/cards"
+            method="get"
+            handle-as="json" 
+            content-type="application/json" 
+            headers="tsec: [[header]]"
+            last-response="Card"
+            
+        >
+        </iron-ajax>
+        
        </template>
 
     <script>
@@ -54,13 +86,35 @@
                     clave:String,
                     body: {
                         type: Object
+                    },
+                    tsec: {
+                        type:String,
+                        value:''
+                    },
+                    logueado:{
+                        type:Boolean,
+                        value:false
+                    },
+                    header:{
+                        type: String
                     }
 
                 };
             }
+
             ajaxResponse(e, request) {
-             var headers = request.xhr.getAllResponseHeaders();
-             console.log(headers);
+             let headers = request.xhr.getAllResponseHeaders();  
+             let arreglo = headers.split(" ");
+             this.tsec = arreglo[2]; 
+             if (this.tsec.length > 0) {
+                 this.logueado=true;
+                } else{
+                    this.logueado=false;
+                }
+                this.header= this.tsec; 
+                console.log(this.header);
+                this.$.ajaxCard.generateRequest();        
+                
             }
 
             login(){
@@ -82,7 +136,8 @@
                             }
                         ;
                 this.body = datos;
-                this.$.ajaxLogin.generateRequest();               
+                this.$.ajaxLogin.generateRequest();        
+                
             }
             /**
              * Instance of the element is created/upgraded. Use: initializing state,
